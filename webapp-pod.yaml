@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: java-webapp
+spec:
+  hostPID: true
+  hostNetwork: true
+  containers:
+  - name: java-webapp
+    image: quay.io/natalia-2-pilot/log4j-shell-webapp
+    ports:
+    - containerPort: 8080
+    securityContext:
+      privileged: true

@@ -1,0 +1,16 @@
+enterprise:
+  btf: /sys/kernel/btf/vmlinux
+  image:
+    repository: quay.io/isovalent/hubble-enterprise
+    tag: v1.10.2
+  enableCiliumAPI: false
+  exportAllowList: |-
+    {"event_set":["PROCESS_EXEC", "PROCESS_EXIT", "PROCESS_CONNECT", "PROCESS_CLOSE", "PROCESS_HTTP", "PROCESS_KPROBE", "PROCESS_TRACEPOINT"]}
+  exportDenyList: ""
+  enableProcessCred: true
+  enableProcessNs: true
+  exportFilename: "fgs.log"
+hubbleEnterpriseOperator:
+  enabled: true
+  image:
+    tag: v1.10.2
