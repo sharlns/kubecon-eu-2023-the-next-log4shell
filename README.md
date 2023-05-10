@@ -5,7 +5,7 @@ This repository contains the demo and the corresponding instructions that was pr
 
 ## Environment
 
-Create a one node Ubuntu cluster:
+Create a one node Ubuntu cluster on GKE:
 ```bash
 gcloud container clusters create "${NAME}" \
   --zone europe-central2-a \
@@ -18,6 +18,13 @@ Check if the cluster is up:
 kubectl get nodes -o wide
 NAME                                                  STATUS   ROLES    AGE   VERSION            INTERNAL-IP   EXTERNAL-IP      OS-IMAGE             KERNEL-VERSION    CONTAINER-RUNTIME
 gke-log4shell-natalia-te-default-pool-5a672e2f-gkjd   Ready    <none>   81s   v1.25.7-gke.1000   10.186.0.46   34.116.193.142   Ubuntu 22.04.2 LTS   5.15.0-1028-gke   containerd://1.6.12
+```
+
+Clone this repo and enter the directory:
+
+```bash
+git clone https://github.com/sharlns/kubecon-eu-2023-the-next-log4shell.git
+cd kubecon-eu-2023-the-next-log4shell
 ```
 
 Deploy Tetragon:
@@ -49,6 +56,12 @@ Clone the PoC Log4shell repository (where the code for the exploit is):
 git clone https://github.com/kozmer/log4j-shell-poc.git
 ```
 
+Enter the directory:
+
+```bash
+cd log4j-shell-poc
+```
+
 Install pip3:
 ```bash
 sudo apt update
@@ -58,6 +71,10 @@ sudo apt install python3-pip
 Install requirements:
 ```bash
 pip install -r requirements.txt
+```
+
+Expect an output such as:
+```
 Defaulting to user installation because normal site-packages is not writeable
 Collecting colorama
   Downloading colorama-0.4.6-py2.py3-none-any.whl (25 kB)
@@ -67,7 +84,10 @@ Installing collected packages: argparse, colorama
 Successfully installed argparse-1.4.0 colorama-0.4.6
 ```
 
-Copy the vulnerable Java version to the Ubuntu VM from a different terminal:
+Download the vulnerable Java version `jdk-8u201-linux-x64.tar.gz`. It can be found [here](https://www.oracle.com/java/technologies/javase/javase8-archive-downloads.html).
+
+Copy the vulnerable Java version to the Ubuntu VM from a different terminal, using `gcloud compute scp`. You may need to use `sudo`. In the example below, the file is transferred to my `/natalia` folder. Use your own folder as appropriate.
+
 ```bash
 gcloud compute scp ./jdk-8u201-linux-x64.tar.gz gke-log4shell-natalia-te-default-pool-5a672e2f-gkjd:/home/natalia
 ```
@@ -93,6 +113,7 @@ You would need 3 terminal for this exploit and a web browser open.
 
 [Terminal 1] Start vulnerable java web application on the `tenant-jobs` namespace. 
 ```bash
+kubectl create ns tenant-jobs
 kubectl apply -f webapp-pod.yaml -n tenant-jobs
 ```
 
@@ -103,6 +124,11 @@ kubectl get pods -n tenant-jobs -o wide
 
 The web application is running with access to the host network namespace, so we can use the Ubuntu
 VM external IP to open it from the web browser. 
+
+Get the external IP of the node. Replace with your own node name.
+```bash
+kubectl get node gke-log4shell-natalia-te-default-pool-5a672e2f-gkjd -o jsonpath='{.status.addresses[?(@.type=="ExternalIP")].address}'
+```
 
 [Web Browser] If we open the web browser and type `<external_ip>:8080`, in my case it's `http://34.118.100.209:8080/`,
 then we should be able to see the Login page of the vulnerable application:
