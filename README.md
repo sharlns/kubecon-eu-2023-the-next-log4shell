@@ -22,9 +22,9 @@ gke-log4shell-natalia-te-default-pool-5a672e2f-gkjd   Ready    <none>   81s   v1
 
 Deploy Tetragon:
 ```bash
-helm repo add isovalent https://helm.isovalent.com
+helm repo add cilium https://helm.cilium.io
 helm repo update
-helm install -n kube-system hubble-enterprise isovalent/hubble-enterprise --version v1.9.6 -f tetragon.yaml
+helm install tetragon cilium/tetragon -n kube-system -f tetragon.yaml
 ```
 
 Check if Tetragon is running:
